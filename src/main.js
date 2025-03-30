@@ -394,7 +394,9 @@ function animate() {
         const dataInput = dataInputs[boid.groupId] || 0;
         // console.log(`dataInput: ${dataInput}`);
         boid.updateParameters(dataInput); // 更新参数
-        boid.update(boids, deltaTime, backExp);
+        if (boid.isReady) {
+            boid.update(boids, deltaTime, backExp);
+        }
         if (!backExplorationCheck()) backExp = false;
     });
 

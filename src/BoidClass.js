@@ -7,13 +7,13 @@ class Boid {
         this.parameterRanges = {
             separationRadius: { min: 2, max: 6 },
             separationStrength: { min: 0.1, max: 0.5 },
-        
+
             alignmentRadius: { min: 4, max: 6 },
             alignmentStrength: { min: 0.05, max: 0.3 },
-        
+
             cohesionRadius: { min: 4, max: 6 },
             cohesionStrength: { min: 0.05, max: 0.3 }
-        };    
+        };
         this.scaledRanges = JSON.parse(JSON.stringify(this.parameterRanges));
         // 初始参数
         this.groupId = groupId; // 添加组特征
@@ -52,9 +52,12 @@ class Boid {
         const hex = groupId === 'A' ? 0x0000ff : groupId === 'B' ? 0xffff00 : 0xffffff; // 根据组设置箭头颜色
         this.arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
 
+        this.isReady = false; 
+        this.mesh = null;
         // 加载模型
         this.modelLoader.loadModel(modelPath).then((model) => {
             this.mesh = model;
+            
             console.log('Model loaded:', this.mesh); // 调试信息
             this.mesh.scale.set(this.size, this.size, this.size); // 调整缩放比例
             this.mesh.position.set(
@@ -71,6 +74,7 @@ class Boid {
             if (onLoadCallback) {
                 onLoadCallback(this.mesh);
             }
+            this.isReady = true;
         }).catch((error) => {
             console.error('Error loading model:', error);
         });
@@ -78,19 +82,19 @@ class Boid {
 
     updateParameters(dataInput) {
         const factor = Math.min(Math.max(dataInput, 0.0), 1.0);
-    
+
         for (const param in this.scaledRanges) {
             const { min, max } = this.scaledRanges[param];
-            if(param === 'separationRadius') {
+            if (param === 'separationRadius') {
                 this.separationRadius = this.lerp(max, min, factor);
-            } else if(param === 'separationStrength') {
+            } else if (param === 'separationStrength') {
                 this.separationStrength = this.lerp(max, min, factor);
-            } else{
-            this[param] = this.lerp(min, max, factor); // 计算新的参数值
+            } else {
+                this[param] = this.lerp(min, max, factor); // 计算新的参数值
             }
-            
+
             // console.log(`Updated parameter ${param}: ${this[param]}`);
-        }   
+        }
         // console.log('Updated parameters:', this);
     }
 
@@ -229,7 +233,7 @@ class Boid {
             this.scaledRanges[param].min = this.parameterRanges[param].min * factor;
             this.scaledRanges[param].max = this.parameterRanges[param].max * factor;
         }
-        
+
     }
 
     // // 设置方向
