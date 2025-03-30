@@ -253,7 +253,9 @@ const clock = new THREE.Clock();
 function calculateCenter(boids) {
     const center = new THREE.Vector3(0, 0, 0);
     boids.forEach(boid => {
-        center.add(boid.mesh.position);
+        if(boid.isReady){
+            center.add(boid.mesh.position);
+        }
     });
     center.divideScalar(boids.length);
     return center;
@@ -395,8 +397,8 @@ function animate() {
     boids.forEach(boid => {
         const dataInput = dataInputs[boid.groupId] || 0;
         // console.log(`dataInput: ${dataInput}`);
-        boid.updateParameters(dataInput); // 更新参数
         if (boid.isReady) {
+        boid.updateParameters(dataInput); // 更新参数
             boid.update(boids, deltaTime, backExp);
         }
         if (!backExplorationCheck()) backExp = false;
