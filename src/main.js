@@ -145,8 +145,8 @@ const sunlight = new THREE.DirectionalLight(0xffffff, 3.0); // 日光强度
 sunlight.position.set(0, 50, 50); // 日光的位置
 scene.add(sunlight);
 
-const modelPathA = '../model/brid2.glb';
-const modelPathB = '../model/brid1.glb';
+const modelPathA = '/model/brid2.glb';
+const modelPathB = '/model/brid1.glb';
 const boids = [];
 const boidsA = [];
 const boidsB = [];
@@ -187,12 +187,12 @@ window.addEventListener("selectionUpdate", function (event) {
 const modelLoader = new ModelLoader();
 // 定义云模型的位置和缩放
 const cloudConfigs = [
-    { url: '../model/cloud1.glb', position: new THREE.Vector3(5, 5, 5), scale: new THREE.Vector3(1, 1, 1) },
-    { url: '../model/cloud2.glb', position: new THREE.Vector3(-10, -3, 10), scale: new THREE.Vector3(1, 1, 1) },
-    { url: '../model/cloud3.glb', position: new THREE.Vector3(30, -2, -20), scale: new THREE.Vector3(1, 1, 1) },
-    { url: '../model/cloud1.glb', position: new THREE.Vector3(30, -2, -20), scale: new THREE.Vector3(1, 1, 1) },
-    { url: '../model/cloud2.glb', position: new THREE.Vector3(5, 5, 5), scale: new THREE.Vector3(1, 1, 1) },
-    { url: '../model/cloud3.glb', position: new THREE.Vector3(-10, -3, 10), scale: new THREE.Vector3(1, 1, 1) }
+    { url: '/model/cloud1.glb', position: new THREE.Vector3(5, 5, 5), scale: new THREE.Vector3(1, 1, 1) },
+    { url: '/model/cloud2.glb', position: new THREE.Vector3(-10, -3, 10), scale: new THREE.Vector3(1, 1, 1) },
+    { url: '/model/cloud3.glb', position: new THREE.Vector3(30, -2, -20), scale: new THREE.Vector3(1, 1, 1) },
+    { url: '/model/cloud1.glb', position: new THREE.Vector3(30, -2, -20), scale: new THREE.Vector3(1, 1, 1) },
+    { url: '/model/cloud2.glb', position: new THREE.Vector3(5, 5, 5), scale: new THREE.Vector3(1, 1, 1) },
+    { url: '/model/cloud3.glb', position: new THREE.Vector3(-10, -3, 10), scale: new THREE.Vector3(1, 1, 1) }
 ];
 const clouds = [];
 cloudConfigs.forEach((config, index) => {
@@ -264,8 +264,9 @@ function calculateAverageDistance(boids) {
     const center = calculateCenter(boids);
     let totalDistance = 0;
     boids.forEach(boid => {
-        const distance = boid.mesh.position.distanceTo(center);
-        totalDistance += distance;
+        if(boid.isReady)
+        {const distance = boid.mesh.position.distanceTo(center);
+        totalDistance += distance;}
     });
     const averageDistance = totalDistance / boids.length;
     return averageDistance;
@@ -281,9 +282,10 @@ function calculateOverallAlignment(boids) {
 
     let totalAlignment = 0;
     boids.forEach(boid => {
+        if(boid.isReady){
         const normalizedVelocity = boid.direction.clone().normalize();
         const alignment = normalizedVelocity.dot(averageVelocity);
-        totalAlignment += alignment;
+        totalAlignment += alignment;}
     });
     const averageAlignment = totalAlignment / boids.length;
     const alignmentPercentage = (averageAlignment * 100).toFixed(2);
