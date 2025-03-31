@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Three.js Example</title>
+    <title>Virtualization Project</title>
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" /> -->
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -20,9 +20,16 @@
 
     <!-- 左侧数据输入窗口 -->
     <div id="input-window">
-        <h3>输入 Boid 数据</h3>
-        <textarea id="dataInput" placeholder="在这里输入 JSON 数据"></textarea>
-        <button onclick="processData()">解析数据</button>
+        <h3>Please input two data lists for virtaulization</h3>
+
+        <textarea id="dataInput" placeholder="Please input the list in JSON format."></textarea>
+
+        <input type="file" id="fileInput" accept=".json">
+
+        <div id="dropZone">Or drop a JSON file here</div>
+
+        <button onclick="processData()">Data Analysis</button>
+
         <p id="statusMessage"></p>
     </div>
 
@@ -44,15 +51,15 @@
 
     <!-- 折叠容器 -->
     <div id="user-selection-container">
-        <button id="toggle-selection">打开设置面板</button>
+        <button id="toggle-selection"> Open Settings Panel</button>
         <div id="selection-panel"></div>
       </div>
 
     <!-- 左侧窗口切换按钮 -->
-    <button id="toggle-input-button">显示输入窗口</button>
+    <button id="toggle-input-button">Data Input Window</button>
 
     <!-- 右侧窗口切换按钮 -->
-    <button id="toggle-data-button">显示数据窗口</button>
+    <button id="toggle-data-button">Data Chart</button>
 
     <!-- 引入 Three.js 和 Chart.js -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
