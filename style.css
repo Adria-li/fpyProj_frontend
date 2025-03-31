@@ -19,6 +19,7 @@ body {
 
 /* 左侧数据输入窗口 */
 #input-window {
+  display: none;
   position: absolute;
   top: 20px;
   left: 20px;

@@ -133,10 +133,19 @@ document.getElementById("toggle-selection").addEventListener("click", function (
 generateSelectionPanel();
 
 // 切换左侧输入窗口
+// 切换左侧输入窗口
 document.getElementById('toggle-input-button').addEventListener('click', function () {
     const inputWindow = document.getElementById('input-window');
-    if (inputWindow.style.display === 'none') {
-        inputWindow.style.display = 'block';
+    const isHidden = inputWindow.style.display === 'none' || inputWindow.style.display === '';
+
+    if (isHidden) {
+        inputWindow.style.display = 'flex'; // 保证 Flex 布局正常应用
+
+        // 触发一次重绘，避免首次显示时排版错乱
+        requestAnimationFrame(() => {
+            inputWindow.scrollTop = 0;
+        });
+
         this.innerText = 'Close Input Window';
     } else {
         inputWindow.style.display = 'none';
