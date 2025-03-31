@@ -222,7 +222,7 @@ window.processData = function () {
         document.getElementById('statusMessage').innerText = "Format correct, analyzing data ...";
 
         // 发送 JSON 到后端
-        fetch('http://localhost:5000/process', {
+        fetch('https://fpyproj-backend.onrender.com/process', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(inputData)
