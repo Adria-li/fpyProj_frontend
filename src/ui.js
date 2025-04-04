@@ -274,6 +274,11 @@ function updateChartData(newData) {
         chart.data.labels = labels; 
         chart.data.datasets[0].data = timeSeriesA; 
         chart.data.datasets[1].data = timeSeriesB; 
+        chart.data.datasets[0].label = dataLabel.A;
+        chart.data.datasets[1].label = dataLabel.B;
+        
+        chart.options.scales.x.title.text = `Data Points`; // 更新横轴标题
+        chart.options.scales.y.title.text = `Data Value`; // 更新纵轴标题
         chart.update(); 
     }
 }
@@ -331,6 +336,7 @@ window.addEventListener("dataReady", (event) => {
 
     // 更新折线图
     updateChartData(receivedData);
+    generateSelectionPanel();
 });
 
 // 初始化折线图
