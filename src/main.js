@@ -262,34 +262,90 @@ function calculateCenter(boids) {
 }
 
 // 函数：计算到中心点的平均距离
+// function calculateAverageDistance(boids) {
+//     const center = calculateCenter(boids);
+//     let totalDistance = 0;
+//     boids.forEach(boid => {
+//         if(boid.isReady)
+//         {const distance = boid.mesh.position.distanceTo(center);
+//         totalDistance += distance;}
+//     });
+//     const averageDistance = totalDistance / boids.length;
+//     return averageDistance;
+// }
 function calculateAverageDistance(boids) {
-    const center = calculateCenter(boids);
     let totalDistance = 0;
+    let count = 0;
+
     boids.forEach(boid => {
-        if(boid.isReady)
-        {const distance = boid.mesh.position.distanceTo(center);
-        totalDistance += distance;}
+        if (!boid.isReady) return;
+
+        const neighbors = boid.getNeighbors(boids, boid.cohesionRadius,7,false); // 获取邻居列表
+
+        if (neighbors.length === 0) return;
+
+        // 计算邻居的中心点
+        const center = neighbors.reduce(
+            (acc, neighbor) => acc.add(neighbor.mesh.position.clone()),
+            new THREE.Vector3(0, 0, 0)
+        ).divideScalar(neighbors.length);
+
+        // 计算当前 boid 到邻居中心的距离
+        const distance = boid.mesh.position.distanceTo(center);
+        totalDistance += distance;
+        count += 1;
     });
-    const averageDistance = totalDistance / boids.length;
-    return averageDistance;
+
+    return count > 0 ? totalDistance / count : 0;
 }
 
 // 函数：计算 Boid 群体的速度朝向一致性百分比
-function calculateOverallAlignment(boids) {
-    const averageVelocity = new THREE.Vector3(0, 0, 0);
-    boids.forEach(boid => {
-        averageVelocity.add(boid.direction);
-    });
-    averageVelocity.divideScalar(boids.length).normalize();
+// function calculateOverallAlignment(boids) {
+//     const averageVelocity = new THREE.Vector3(0, 0, 0);
+//     boids.forEach(boid => {
+//         averageVelocity.add(boid.direction);
+//     });
+//     averageVelocity.divideScalar(boids.length).normalize();
 
+//     let totalAlignment = 0;
+//     boids.forEach(boid => {
+//         if(boid.isReady){
+//         const normalizedVelocity = boid.direction.clone().normalize();
+//         const alignment = normalizedVelocity.dot(averageVelocity);
+//         totalAlignment += alignment;}
+//     });
+//     const averageAlignment = totalAlignment / boids.length;
+//     const alignmentPercentage = (averageAlignment * 100).toFixed(2);
+
+//     return `${alignmentPercentage}%`;
+// }
+function calculateOverallAlignment(boids) {
     let totalAlignment = 0;
+    let count = 0;
+
     boids.forEach(boid => {
-        if(boid.isReady){
-        const normalizedVelocity = boid.direction.clone().normalize();
-        const alignment = normalizedVelocity.dot(averageVelocity);
-        totalAlignment += alignment;}
+        if (!boid.isReady) return;
+
+        const neighbors = boid.getNeighbors(boids, boid.alignmentRadius,7,false);;
+        if (neighbors.length === 0) return;
+
+        // 计算邻居的平均方向
+        const averageNeighborDirection = neighbors.reduce(
+            (acc, neighbor) => acc.add(neighbor.direction.clone()),
+            new THREE.Vector3(0, 0, 0)
+        ).divideScalar(neighbors.length).normalize();
+
+        // 当前 boid 的方向
+        const normalizedBoidDirection = boid.direction.clone().normalize();
+
+        // 计算当前 boid 与邻居平均方向的对齐度（夹角的余弦）
+        const alignment = normalizedBoidDirection.dot(averageNeighborDirection);
+
+        totalAlignment += alignment;
+        count += 1;
     });
-    const averageAlignment = totalAlignment / boids.length;
+
+    const averageAlignment = count > 0 ? totalAlignment / count : 0;
     const alignmentPercentage = (averageAlignment * 100).toFixed(2);
 
     return `${alignmentPercentage}%`;
