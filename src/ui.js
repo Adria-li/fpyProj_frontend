@@ -221,8 +221,10 @@ window.processData = function () {
         const inputData = JSON.parse(input); // 解析 JSON
         document.getElementById('statusMessage').innerText = "Format correct, analyzing data ...";
 
+        const url = 'http://127.0.0.1:5000/process'; // 本地后端地址
+        // const url = 'https://fpyproj-backend.onrender.com/process'; // 线上后端地址
         // 发送 JSON 到后端
-        fetch('https://fpyproj-backend.onrender.com/process', {
+        fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(inputData)
@@ -260,14 +262,11 @@ window.processData = function () {
 
 // 初始化折线图的变量
 let chart;
-
-// 更新折线图数据的函数
 function updateChartData(newData) {
     const allKeys = Object.keys(newData.occupancyTimeSeriesUsed);
     const timeSeriesA = newData.occupancyTimeSeriesUsed[allKeys[0]]; 
     const timeSeriesB = newData.occupancyTimeSeriesUsed[allKeys[1]]; 
 
-    // 生成横轴标签 (按数据点计数)
     const labels = Array.from({ length: timeSeriesA.length }, (_, i) => `Point ${i + 1}`);
 
     if (chart) {
@@ -277,15 +276,15 @@ function updateChartData(newData) {
         chart.data.datasets[0].label = dataLabel.A;
         chart.data.datasets[1].label = dataLabel.B;
         
-        chart.options.scales.x.title.text = `Data Points`; // 更新横轴标题
-        chart.options.scales.y.title.text = `Data Value`; // 更新纵轴标题
+        chart.options.scales.x.title.text = `Data Points`; 
+        chart.options.scales.y.title.text = `Data Value`;
         chart.update(); 
     }
 }
 
 // 监听 "dataReady" 事件
 window.addEventListener("dataReady", (event) => {
-    const receivedData = event.detail; // Get the data sent with the event
+    const receivedData = event.detail; 
 
     // Extract data fields
     const rawLyap = receivedData.rawLyap || {};
@@ -334,7 +333,7 @@ window.addEventListener("dataReady", (event) => {
         </div>
     `;
 
-    // 更新折线图
+    // Update the chart data
     updateChartData(receivedData);
     generateSelectionPanel();
 });
@@ -344,11 +343,11 @@ const ctx = document.getElementById('line-chart').getContext('2d');
 chart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: [], // 数据点标签，初始为空
+        labels: [], 
         datasets: [
             {
                 label: dataLabel.A,
-                data: [], // 初始为空
+                data: [], 
                 borderColor: 'rgb(99, 115, 255)',
                 backgroundColor: 'rgba(99, 115, 255, 0.69)',
                 borderWidth: 2,
@@ -356,7 +355,7 @@ chart = new Chart(ctx, {
             },
             {
                 label: dataLabel.B,
-                data: [], // 初始为空
+                data: [], 
                 borderColor: 'rgb(255, 242, 54)',
                 backgroundColor: 'rgba(255, 242, 54, 0.2)',
                 borderWidth: 2,
@@ -377,7 +376,7 @@ chart = new Chart(ctx, {
             x: {
                 title: {
                     display: true,
-                    text: 'Data Points (30 seconds each)' // 修改为数据点单位并说明
+                    text: 'Data Points (30 seconds each)' 
                 }
             },
             y: {
@@ -386,7 +385,7 @@ chart = new Chart(ctx, {
                     text: 'Occupancy Rate (%)'
                 },
                 suggestedMin: 0,
-                suggestedMax: 100 // 假设占用率范围是 0% 到 100%
+                suggestedMax: 100 
             }
         }
     }

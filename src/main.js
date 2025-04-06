@@ -26,31 +26,26 @@ const sharedData = {
     occupancyTimeSeriesUsed: {},
     rawLyap: {},
     normalizedLyap: {},
-    averageAlignment: {},//A,B
+    averageAlignment: {},
     averageDistance: {}
 };
 
 async function fetchData() {
     try {
-        // 请求 JSON 文件
         const response = await fetch("/lyapunov_results_shift.json");
 
-        // 检查 HTTP 状态码
         if (!response.ok) {
             throw new Error(`HTTP 错误！状态码: ${response.status}`);
         }
 
-        // 解析 JSON 数据
         const data = await response.json();
-        rawData.data = data; // 直接修改 rawData 的引用内容
+        rawData.data = data;
         processData(data);
     } catch (error) {
-        // 捕获并打印错误
         console.error("获取数据失败:", error);
 
-        // 如果需要，终止程序（例如在 Node.js 环境中）
         if (typeof process !== "undefined" && process.exit) {
-            process.exit(1); // 非 0 的状态码表示异常退出
+            process.exit(1);
         }
     }
 }
@@ -61,9 +56,9 @@ const idMapping = {
 };
 
 window.addEventListener("dataInputed", (event) => {
-    const receivedData = event.detail; // 获取事件中发送的数据
-    processData(receivedData); // 处理数据
-    console.log("目前的后端数据:", backendData);
+    const receivedData = event.detail;
+    processData(receivedData);
+    console.log("Backend data at this time:", backendData);
 }
 )
 
@@ -81,10 +76,8 @@ function processData(data) {
 
     // **动态获取所有 key**
     const allKeys = Object.keys(backendData.results);
-    console.log("🔍 发现的后端 ID:", allKeys);
-    // **清空对象，防止旧数据残留**
-    // dataInputs = {    'A': 0,
-    //     'B': 0,};
+    console.log("发现的后端 ID:", allKeys);
+
     sharedData.rawLyap = {};
     sharedData.normalizedLyap = {};
     sharedData.occupancyTimeSeriesUsed = {};
@@ -166,7 +159,7 @@ for (let i = 0; i < 100; i++) {
 }
 
 window.addEventListener("selectionUpdate", function (event) {
-    console.log("📢 Received selectionUpdate:", event.detail.selectionData);
+    console.log("Received selectionUpdate:", event.detail.selectionData);
 
     const selectionData = event.detail.selectionData;
 
@@ -253,7 +246,7 @@ const clock = new THREE.Clock();
 function calculateCenter(boids) {
     const center = new THREE.Vector3(0, 0, 0);
     boids.forEach(boid => {
-        if(boid.isReady){
+        if (boid.isReady) {
             center.add(boid.mesh.position);
         }
     });
@@ -261,18 +254,6 @@ function calculateCenter(boids) {
     return center;
 }
 
-// 函数：计算到中心点的平均距离
-// function calculateAverageDistance(boids) {
-//     const center = calculateCenter(boids);
-//     let totalDistance = 0;
-//     boids.forEach(boid => {
-//         if(boid.isReady)
-//         {const distance = boid.mesh.position.distanceTo(center);
-//         totalDistance += distance;}
-//     });
-//     const averageDistance = totalDistance / boids.length;
-//     return averageDistance;
-// }
 function calculateAverageDistance(boids) {
     let totalDistance = 0;
     let count = 0;
@@ -280,17 +261,20 @@ function calculateAverageDistance(boids) {
     boids.forEach(boid => {
         if (!boid.isReady) return;
 
-        const neighbors = boid.getNeighbors(boids, boid.cohesionRadius,7,false); // 获取邻居列表
+        const neighbors = boid.getNeighbors(boids, boid.cohesionRadius, 7, false); 
+        if (neighbors.length === 0) {
+            totalDistance += boid.separationRadius; // 使用默认的 separationRadius
+            console.log("没有邻居，使用默认的 separationRadius "+boid.separationRadius + " boidId: " + boid.groupId);
 
-        if (neighbors.length === 0) return;
+            count += 1;
+            return;
+        }
 
-        // 计算邻居的中心点
         const center = neighbors.reduce(
             (acc, neighbor) => acc.add(neighbor.mesh.position.clone()),
             new THREE.Vector3(0, 0, 0)
         ).divideScalar(neighbors.length);
 
-        // 计算当前 boid 到邻居中心的距离
         const distance = boid.mesh.position.distanceTo(center);
         totalDistance += distance;
         count += 1;
@@ -299,26 +283,6 @@ function calculateAverageDistance(boids) {
     return count > 0 ? totalDistance / count : 0;
 }
 
-// 函数：计算 Boid 群体的速度朝向一致性百分比
-// function calculateOverallAlignment(boids) {
-//     const averageVelocity = new THREE.Vector3(0, 0, 0);
-//     boids.forEach(boid => {
-//         averageVelocity.add(boid.direction);
-//     });
-//     averageVelocity.divideScalar(boids.length).normalize();
-
-//     let totalAlignment = 0;
-//     boids.forEach(boid => {
-//         if(boid.isReady){
-//         const normalizedVelocity = boid.direction.clone().normalize();
-//         const alignment = normalizedVelocity.dot(averageVelocity);
-//         totalAlignment += alignment;}
-//     });
-//     const averageAlignment = totalAlignment / boids.length;
-//     const alignmentPercentage = (averageAlignment * 100).toFixed(2);
-
-//     return `${alignmentPercentage}%`;
-// }
 function calculateOverallAlignment(boids) {
     let totalAlignment = 0;
     let count = 0;
@@ -326,20 +290,20 @@ function calculateOverallAlignment(boids) {
     boids.forEach(boid => {
         if (!boid.isReady) return;
 
-        const neighbors = boid.getNeighbors(boids, boid.alignmentRadius,7,false);;
+        const neighbors = boid.getNeighbors(boids, boid.alignmentRadius, 7, false);
         if (neighbors.length === 0) return;
 
-        // 计算邻居的平均方向
         const averageNeighborDirection = neighbors.reduce(
             (acc, neighbor) => acc.add(neighbor.direction.clone()),
             new THREE.Vector3(0, 0, 0)
         ).divideScalar(neighbors.length).normalize();
 
-        // 当前 boid 的方向
         const normalizedBoidDirection = boid.direction.clone().normalize();
+        const dot = normalizedBoidDirection.dot(averageNeighborDirection);
 
-        // 计算当前 boid 与邻居平均方向的对齐度（夹角的余弦）
-        const alignment = normalizedBoidDirection.dot(averageNeighborDirection);
+        // Mapping the dot product to a range of 0 to 1
+        // This will give a value of 0 for opposite directions and 1 for same direction
+        const alignment = (dot + 1) / 2;
 
         totalAlignment += alignment;
         count += 1;
@@ -356,13 +320,11 @@ const dataInputs = {
     'B': 1,
 };
 
-// 时间间隔设置
 function backExplorationCheck() {
     let number = 0;
     boids.forEach(boid => {
         if (boid.exploringBack) number += 1;
     });
-    // console.log(`正在探索的boid数量: ${number}`);
     return number < Math.floor(20 + Math.random() * 3);
 }
 
@@ -370,13 +332,11 @@ let lastExeTime = 0;
 let lastExeTime2 = 0;
 const exeInterval = 5;
 const dataInputInterval = 30;
-// 共享数据（处理后的数据，供 UI 和 Three.js 使用）
 
 // 动画循环
 function animate() {
     requestAnimationFrame(animate);
 
-    // 更新云的运动变换
     clouds.forEach((cloud, index) => {
         if (index < 3) {
             cloud.position.y += Math.sin(Date.now() * 0.001 + index) * 0.001;
@@ -387,10 +347,11 @@ function animate() {
         }
     });
 
-    const deltaTime = clock.getDelta(); // 获取时间增量
+    const deltaTime = clock.getDelta();
 
     let backExp = false;
     const currentTime = clock.getElapsedTime();
+    // Evaluation interval
     if (currentTime - lastExeTime >= exeInterval) {
         lastExeTime = currentTime;
         if (backExplorationCheck()) backExp = true;
@@ -405,15 +366,13 @@ function animate() {
 
         console.log(`更新 sharedData1: ${JSON.stringify(sharedData)}`);
 
-        // **触发事件**
         const event = new CustomEvent("dataReady", { detail: sharedData });
         window.dispatchEvent(event);
     }
-
+    // Window move interval 
     if (currentTime - lastExeTime2 >= dataInputInterval) {
         lastExeTime2 = currentTime;
 
-        // **确保 currentIndex 不超出数据长度**
         const allKeys = Object.keys(normalizeLyap);
         const validKeys = allKeys.filter(key => currentIndex < normalizeLyap[key].length);
 
@@ -421,54 +380,42 @@ function animate() {
         if (validKeys.length > 0) {
             dataInputs['A'] = normalizeLyap[allKeys[0]][currentIndex];
             dataInputs['B'] = normalizeLyap[allKeys[1]][currentIndex]
-            // console.log(`A dataInput: ${normalizeLyap[allKeys[0]][currentIndex]}`);
             validKeys.forEach((key) => {
-                // dataInputs[key] = normalizeLyap[key][currentIndex];
                 sharedData.rawLyap[key] = lyapExponents[key][currentIndex];
                 sharedData.normalizedLyap[key] = normalizeLyap[key][currentIndex];
 
-                // **计算滑动窗口的起点**
                 const startIndex = Math.max(0, currentIndex * 6);
                 const endIndex = Math.min(occupancyTimeSeries[key].length, startIndex + 100);
 
                 sharedData.occupancyTimeSeriesUsed[key] = occupancyTimeSeries[key].slice(startIndex, endIndex);
             });
 
-            // console.log(`更新 sharedData2: ${JSON.stringify(sharedData)}`);
-
-            // **触发事件**
             const event = new CustomEvent("dataReady", { detail: sharedData });
             window.dispatchEvent(event);
 
-            // **移动到下一个数据点**
             currentIndex++;
         } else {
-            console.log("已遍历完 normalizeLyap，停止更新！");
+            console.log("Iteration finished, no more data to process.");
         }
     }
-    // console.log(`dataInputs: ${JSON.stringify(dataInputs)}`);
 
-    // // 更新所有 Boid
-    // Boid.updateAll(boids, deltaTime);
+    // New input each time
     boids.forEach(boid => {
         const dataInput = dataInputs[boid.groupId] || 0;
-        // console.log(`dataInput: ${dataInput}`);
         if (boid.isReady) {
-        boid.updateParameters(dataInput); // 更新参数
+            boid.updateParameters(dataInput);
             boid.update(boids, deltaTime, backExp);
         }
         if (!backExplorationCheck()) backExp = false;
     });
 
-    controls.update(); // 更新控制器
-    renderer.render(scene, camera); // 渲染场景
+    controls.update();
+    renderer.render(scene, camera);
 }
 
-// initializeData();
 fetchData();
 animate();
 
-// 处理窗口大小调整
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
