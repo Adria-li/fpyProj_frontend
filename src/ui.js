@@ -221,8 +221,8 @@ window.processData = function () {
         const inputData = JSON.parse(input); // 解析 JSON
         document.getElementById('statusMessage').innerText = "Format correct, analyzing data ...";
 
-        const url = 'http://127.0.0.1:5000/process'; // 本地后端地址
-        // const url = 'https://fpyproj-backend.onrender.com/process'; // 线上后端地址
+        // const url = 'http://127.0.0.1:5000/process'; // 本地后端地址
+        const url = 'https://fpyproj-backend.onrender.com/process'; // 线上后端地址
         // 发送 JSON 到后端
         fetch(url, {
             method: 'POST',
