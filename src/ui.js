@@ -243,9 +243,9 @@ window.processData = function () {
                     document.getElementById('statusMessage').innerText = "Data Processed Successfully!";
                     // 获取所有键（ID）
                     const allKeys = Object.keys(result.results);
-                    // console.log("发现的后端 ID:", allKeys);
                     dataLabel.A = allKeys[0];
                     dataLabel.B = allKeys[1];
+                    generateSelectionPanel(); // 重新生成选择面板
                     const event = new CustomEvent("dataInputed", { detail: result });
                     window.dispatchEvent(event);
                 }
@@ -334,7 +334,7 @@ window.addEventListener("dataReady", (event) => {
 
     // Update the chart data
     updateChartData(receivedData);
-    generateSelectionPanel();
+    // generateSelectionPanel();
 });
 
 // 初始化折线图
